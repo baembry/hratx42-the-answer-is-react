@@ -17,7 +17,7 @@ module.exports = {
                 },
                 {
                     "id": 87702,
-                    "answer": "Noah\\'s Ark",
+                    "answer": "Noah's Ark",
                     "question": "Former astronaut James Irwin launched several expeditions in hopes of finding this on Mount Ararat",
                     "value": 400,
                     "airdate": "2009-07-22T12:00:00.000Z",

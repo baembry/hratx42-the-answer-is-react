@@ -1,12 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Categories from './Categories'
+import Clue from './Clue';
 
-const Gameboard = props => {
+const Gameboard = ({categories, currentQuestion, handleSelectClue, showClue, answeredQuestions}) => {
   return (
-    <div data-testid="gameboard" id={props.currentQuestion.question ? 'question' : 'gameboard'}>
-      {/* was a question clicked?  */}
-      {/* Yes? Show clue */}
-      {/* No? Show Categories */}
+    <div data-testid="gameboard" id={showClue ? 'question' : 'gameboard'}>
+
+      {showClue ? <Clue clueObject={currentQuestion} showClue={showClue}/> : <Categories categories={categories} handleSelectClue={handleSelectClue} answeredQuestions={answeredQuestions}/>}
+ 
     </div>
   );
 };

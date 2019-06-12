@@ -5,7 +5,26 @@ const Clue = props => {
   // show $ value of clue OR
   // the Clue question itself OR
   // empty screen if it was already answered
-  return 'hi';
+  
+  var getClue = () => {
+    if (props.answeredQuestions.includes(props.clueObject.id)){
+      return (<div className='clueValue'></div>)
+    } else {
+      return (<div className='clueValue' onClick={() => props.handleSelectClue(props.clueObject)}>
+      ${props.clueObject.value}
+    </div>)
+    }
+  }
+
+  
+  if (props.showClue) {
+  
+     return (<div onClick={() => props.handleSelectClue(props.clueObject)}>
+     {props.clueObject.question}
+   </div>);
+  } else {
+    return getClue();
+  }
 };
 
 Clue.propTypes = {

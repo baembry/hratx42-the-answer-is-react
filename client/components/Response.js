@@ -14,6 +14,10 @@ export default class Response extends Component {
   }
   submitResponse(event) {
     // this function should fire when the user fills the response and hits 'enter'
+    if(event.keyCode === 13){
+      this.props.handleSubmit(this.state.userResponse);
+      event.target.value = '';
+    }
       // Is the user response correct? 
       // yes/no? What should happen?
   }
@@ -24,7 +28,9 @@ export default class Response extends Component {
           type='text'
           placeholder='Answers go here!'
           // handle data change
+          onChange={(event) => this.recordResponse(event.target.value)}
           // handle when 'enter' is hit
+          onKeyDown={(event) => this.submitResponse(event)}
         >
         </input>
       </div>
