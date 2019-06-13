@@ -18,13 +18,18 @@ export default class App extends Component {
       scores: [],
       buzzers: [],
       activePlayer: null,
-      showClue: false
+      showClue: false,
+      showAnswer: false,
+      timer: null,
+      showClueInterval: 4000,
+      showAnswerInterval: 2000,
+      ineligiblePlayers: []
     };
     this.handleSelectClue=this.handleSelectClue.bind(this);
     this.handleSubmit=this.handleSubmit.bind(this);
   }
     componentDidMount() {
-      document.addEventListener('keypress', (event) => {this.buzzer(event)})
+      window.addEventListener('keypress', (event) => {console.log(event); this.buzzer(event)})
       this.getNumberOfPlayers();
       axios.get('http://jservice.io/api/categories?count=5' )
       .then(
@@ -64,45 +69,95 @@ export default class App extends Component {
   }
 
   buzzer(event){
-    //set active player
-    if(this.state.activePlayer !== null){
+    //do nothing if a player is already active              
+    if(this.state.activePlayer !== null) {
       return;
     }
-    let player;
-    if(event.keyCode === 113){
+    let timer = this.state.timer;
+    clearTimeout(timer);
+    this.startClueTimer(4000);
+    let player = null;
+    if(event.keyCode === 113){// q key
       player = 0
+
     }
-    if(event.keyCode === 32){
+    if(event.keyCode === 32){// space bar
       player = 1
     }
-    if(event.keyCode === 39){
+    if(event.keyCode === 39){// " key
       player = 2
     }
-    if(event.keyCode === 61){
+    if(event.keyCode === 61){//+ key
       player = 3
     }
-    this.setState({activePlayer: player})
+    if(!this.state.ineligiblePlayers.includes(player)){
+      this.setState({activePlayer: player})}
+    
   }
 
   handleSelectClue(clueObject){
-    this.setState({currentQuestion: clueObject, showClue: true})
+    this.startClueTimer(this.state.showClueInterval);
+    this.setState({currentQuestion: clueObject, showClue: true, ineligiblePlayers: []})
   }
 
-  handleSubmit(answer){
-    console.log(this.state.currentQuestion.answer + "   " + answer)
+  startClueTimer(interval){
+    let timer = this.state.timer;
+    clearTimeout(timer);
+    timer = setTimeout( 
+      () => {
+        if(this.state.activePlayer !== null){
+          console.log("Too late! You lose")
+          this.answerIs(false);
+        } else {
+          console.log("No one got it right")
+          this.setState({showAnswer: true, showClue: false, activePlayer: null}, this.startAnswerTimer())
+        }
+      }, 
+      interval)
+    this.setState({timer}); 
+  }
+
+  startAnswerTimer(){
+    let timer = this.state.timer;
+    clearTimeout(timer);
+    timer = setTimeout( 
+      () => this.setState({showAnswer: false, showClue: false}), 
+      this.state.showAnswerInterval)
+    this.setState({timer}); 
+  }
+
+  answerIs(correct){
     let scores = [...this.state.scores];
     let activePlayer = this.state.activePlayer;
     var answeredQuestions = [...this.state.answeredQuestions];
     answeredQuestions.push(this.state.currentQuestion.id);
+    let ineligiblePlayers = [...this.state.ineligiblePlayers];
 
-    if(answer.toLowerCase() === this.state.currentQuestion.answer.toLowerCase()){
+    if(correct){
       scores[activePlayer] += this.state.currentQuestion.value;
-      this.setState({scores, showClue: false, answeredQuestions, activePlayer: null})
+      this.setState({scores, showClue: false, answeredQuestions, activePlayer: null, ineligiblePlayers: []})
     } else {
       scores[activePlayer] -= this.state.currentQuestion.value;
-      this.setState({scores, showClue: false, answeredQuestions, activePlayer: null})
+      let showClue = true;
+      ineligiblePlayers.push(activePlayer);
+      if(ineligiblePlayers.length === this.state.scores.length){
+        showClue = false;
+        ineligiblePlayers = [];
+      }
+      this.setState({scores, showClue, answeredQuestions, activePlayer: null, ineligiblePlayers}, this.startClueTimer(4000)); 
     }
+  }
 
+
+  handleSubmit(answer){
+    console.log(this.state.currentQuestion.answer + "   " + answer)
+    const timer = this.state.timer;
+    clearTimeout(timer);
+    if(answer.toLowerCase() === this.state.currentQuestion.answer.toLowerCase()){
+      this.answerIs(true)
+    } else {
+      this.answerIs(false)
+    }
   }
   // renderContent(){
     
@@ -130,11 +185,12 @@ export default class App extends Component {
             categories={this.state.categories} 
             handleSelectClue={this.handleSelectClue} 
             showClue={this.state.showClue}
+            showAnswer={this.state.showAnswer}
             answeredQuestions={this.state.answeredQuestions}/>
           <Scoreboard scores={this.state.scores}/>
         </>
         )}
-        {this.state.showClue && <Response handleSubmit={this.handleSubmit}/>}
+        {this.state.activePlayer !== null && <Response handleSubmit={this.handleSubmit} activePlayer={this.state.activePlayer}/>}
       </div>
     );
   }

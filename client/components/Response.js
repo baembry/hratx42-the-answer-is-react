@@ -5,7 +5,7 @@ export default class Response extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      userResponse: ''
+      userResponse: '',
     }
     this.recordResponse = this.recordResponse.bind(this);
   }
@@ -24,6 +24,7 @@ export default class Response extends Component {
   render(){
     return (
       <div id={'response'} data-testid="response">
+        <p>Player {this.props.activePlayer} please answer</p>
         <input
           type='text'
           placeholder='Answers go here!'

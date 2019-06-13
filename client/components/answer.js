@@ -17,10 +17,10 @@ const Clue = props => {
   }
 
   
-  if (props.showClue || props.showAnswer) {
+  if (props.showClue) {
   
      return (<div onClick={() => props.handleSelectClue(props.clueObject)}>
-     {props.showClue ? props.clueObject.question : props.clueObject.answer}
+     {props.clueObject.question}
    </div>);
   } else {
     return getClue();
